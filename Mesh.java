@@ -21,4 +21,6 @@ public class Mesh {
             }
         }
     }
+
+    public List<Triangle> getTriangles() { return list; }
 }
