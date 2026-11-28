@@ -3,6 +3,113 @@ package src;
 public class MatrixOperator {
     public MatrixOperator() {};
 
+    public Matrix add(Matrix a, Matrix b) {
+        // reject invalid inputs
+        if (a.getLength() != b.getLength() || a.getWidth() != b.getWidth()) {
+            return null;
+        }
+
+        // add corresponding elements
+        Matrix sum = new Matrix(a.getLength(), a.getWidth());
+        for (int i = 0; i < a.getLength(); i++) {
+            for (int j = 0; j < a.getWidth(); j++) {
+                int val = a.getValue(j, i) + b.getValue(j, i);
+                sum.setValue(j, i, val);
+            }
+        }
+
+        return sum;
+    }
+
+    public Matrix subtract(Matrix a, Matrix b) {
+        // reject invalid inputs
+        if (a.getLength() != b.getLength() || a.getWidth() != b.getWidth()) {
+            return null;
+        }
+
+        // subtract corresponding elements
+        Matrix difference = new Matrix(a.getLength(), a.getWidth());
+        for (int i = 0; i < a.getLength(); i++) {
+            for (int j = 0; j < a.getWidth(); j++) {
+                int val = a.getValue(j, i) - b.getValue(j, i);
+                difference.setValue(j, i, val);
+            }
+        }
+
+        return difference;
+    }
+
+    // naive O(n^3) approach
+    public Matrix multiply(Matrix a, Matrix b) {
+        // reject invalid inputs
+        if (a.getWidth() != b.getLength()) {
+            return null;
+        }
+
+        // the product of two matrices with dimensions m x n and n x k has dimensions m x k
+        Matrix product = new Matrix(a.getLength(), b.getWidth());
+
+        // multiply matrices
+        for (int i = 0; i < product.getLength(); i++) {
+            for (int j = 0; j < product.getWidth(); j++) {
+                int val = 0;
+                for (int k = 0; k < a.getWidth(); k++) {
+                    val += a.getValue(k, i) * b.getValue(j, k);
+                }
+                product.setValue(j, i, val);
+            }
+        }
+
+        return product;
+    }
+    
+    // Strassen's fast matrix multiplication algorithm
+    public Matrix strassenMultiply(Matrix a, Matrix b) {
+        // reject invalid inputs
+        if (a.getWidth() != b.getLength()) {
+            return null;
+        }
+
+        // initialize submatrices
+        Matrix a11 = strassenSplit(strassenSplit(a, true)[0], false)[0]; // upper left quadrant
+        Matrix a12 = strassenSplit(strassenSplit(a, true)[0], false)[1]; // upper right quadrant
+        Matrix a21 = strassenSplit(strassenSplit(a, true)[1], false)[0]; // lower left quadrant
+        Matrix a22 = strassenSplit(strassenSplit(a, true)[1], false)[1]; // lower right quadrant
+        
+        Matrix b11 = strassenSplit(strassenSplit(b, true)[0], false)[0]; // upper left quadrant
+        Matrix b12 = strassenSplit(strassenSplit(b, true)[0], false)[1]; // upper rigth quadrant
+        Matrix b21 = strassenSplit(strassenSplit(b, true)[1], false)[0]; // lower left quadrant
+        Matrix b22 = strassenSplit(strassenSplit(b, true)[1], false)[1]; // lower right quadrant
+
+        // calculate seven products
+        Matrix M1 = multiply(add(a11, a22), add(b11, b22));         // (a11 + a22)(b11 + b22)
+        Matrix M2 = multiply(add(a21, a22), b11);                   // (a21 + a22)b11
+        Matrix M3 = multiply(a11, subtract(b12, b22));              // a11(b12 - b22)
+        Matrix M4 = multiply(a22, subtract(b21, b11));              // a22(b21 - b11)
+        Matrix M5 = multiply(add(a11, a12), b22);                   // (a11 + a12)b22
+        Matrix M6 = multiply(subtract(a21, a11), add(b11, b12));    // (a21 - a11)(b11 + b12)
+        Matrix M7 = multiply(subtract(a12, a22), add(b21, b22));    // (a12 - a22)(b21 + b22)
+
+        // perform arithmetic on submatrices to get four quadrants
+        Matrix Q1 = add(subtract(add(M1, M4), M5), M7);     // M1 + M4 - M5 + M7
+        Matrix Q2 = add(M3, M5);                            // M3 + M5
+        Matrix Q3 = add(M2, M4);                            // M2 + M4
+        Matrix Q4 = add(add(subtract(M1, M2), M3), M6);     // M1 - M2 + M3 + M6
+
+        // combine quadrants
+        Matrix untrimmedProduct = append(append(Q1, Q2, false), append(Q3, Q4, false), true);
+
+        // trim extra zeroes
+        Matrix trimmedProduct = new Matrix(a.getLength(), b.getWidth());
+        for (int i = 0; i < trimmedProduct.getLength(); i++) {
+            for (int j = 0; j < trimmedProduct.getWidth(); j++) {
+                trimmedProduct.setValue(j, i, untrimmedProduct.getValue(j, i));
+            }
+        }
+
+        return trimmedProduct;
+    }
+
     public Matrix append(Matrix a, Matrix b, boolean lengthwise) {
         // reject invalid inputs
         if (lengthwise && a.getWidth() != b.getWidth()) {
@@ -159,96 +266,5 @@ public class MatrixOperator {
         }
 
         return new Matrix[]{a, b};
-    }
-
-    public Matrix add(Matrix a, Matrix b) {
-        // reject invalid inputs
-        if (a.getLength() != b.getLength() || a.getWidth() != b.getWidth()) {
-            return null;
-        }
-
-        // add corresponding elements
-        Matrix sum = new Matrix(a.getLength(), a.getWidth());
-        for (int i = 0; i < a.getLength(); i++) {
-            for (int j = 0; j < a.getWidth(); j++) {
-                int val = a.getValue(j, i) + b.getValue(j, i);
-                sum.setValue(j, i, val);
-            }
-        }
-
-        return sum;
-    }
-
-    public Matrix subtract(Matrix a, Matrix b) {
-        // reject invalid inputs
-        if (a.getLength() != b.getLength() || a.getWidth() != b.getWidth()) {
-            return null;
-        }
-
-        // subtract corresponding elements
-        Matrix difference = new Matrix(a.getLength(), a.getWidth());
-        for (int i = 0; i < a.getLength(); i++) {
-            for (int j = 0; j < a.getWidth(); j++) {
-                int val = a.getValue(j, i) - b.getValue(j, i);
-                difference.setValue(j, i, val);
-            }
-        }
-
-        return difference;
-    }
-
-    // naive O(n^3) approach
-    public Matrix multiply(Matrix a, Matrix b) {
-        // reject invalid inputs
-        if (a.getWidth() != b.getLength()) {
-            return null;
-        }
-
-        // the product of two matrices with dimensions m x n and n x k has dimensions m x k
-        Matrix product = new Matrix(a.getLength(), b.getWidth());
-
-        // multiply matrices
-        for (int i = 0; i < product.getLength(); i++) {
-            for (int j = 0; j < product.getWidth(); j++) {
-                int val = 0;
-                for (int k = 0; k < a.getWidth(); k++) {
-                    val += a.getValue(k, i) * b.getValue(j, k);
-                }
-                product.setValue(j, i, val);
-            }
-        }
-
-        return product;
-    }
-    
-    // Strassen's fast matrix multiplication algorithm
-    public Matrix fastMultiply(Matrix a, Matrix b) {
-        // reject invalid inputs
-        if (a.getWidth() != b.getLength()) {
-            return null;
-        }
-
-        // the product of two matrices with dimensions m x n and n x k has dimensions m x k
-        Matrix product = new Matrix(a.getLength(), b.getWidth());
-
-        // initialize submatrices
-        Matrix M1 = new Matrix(1, 1);
-        Matrix M2 = new Matrix(1, 1);
-        Matrix M3 = new Matrix(1, 1);
-        Matrix M4 = new Matrix(1, 1);
-        Matrix M5 = new Matrix(1, 1);
-        Matrix M6 = new Matrix(1, 1);
-        Matrix M7 = new Matrix(1, 1);
-
-        // perform arithmetic on submatrices to get four quadrants
-        Matrix Q1 = add(subtract(add(M1, M4), M5), M7); // M1 + M4 - M5 + M7
-        Matrix Q2 = add(M3, M5); // M3 + M5
-        Matrix Q3 = add(M2, M4); // M2 + M4
-        Matrix Q4 = add(add(subtract(M1, M2), M3), M6); // M1 - M2 + M3 + M6
-
-        // combine quadrants
-        product = append(append(Q1, Q2, false), append(Q3, Q4, false), true);
-
-        return product;
     }
 }
