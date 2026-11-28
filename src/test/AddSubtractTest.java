@@ -1,7 +1,5 @@
 package src.test;
 
-// JUnit
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import src.Matrix;
@@ -18,11 +16,7 @@ public class AddSubtractTest {
         Matrix sum = op.add(a, b);
         Matrix expected = new Matrix(new int[][]{{11, 13, 15}, {17, 19, 21}, {23, 25, 27}});
 
-        for (int i = 0; i < sum.getLength(); i++) {
-            for (int j = 0; j < sum.getWidth(); j++) {
-                assertEquals(sum.getValue(j, i), expected.getValue(j, i));
-            }
-        }
+        TestingTools.compare(sum, expected, "Incorrect sum");
     }
 
     @Test
@@ -32,21 +26,16 @@ public class AddSubtractTest {
 
         MatrixOperator op = new MatrixOperator();
 
+        // A - B test
         Matrix aMinusB = op.subtract(a, b);
         Matrix aMinusB_expected = new Matrix(new int[][]{{-17, -15, -13}, {-11, -9, -7}, {-5, -3, -1}});
 
-        for (int i = 0; i < aMinusB.getLength(); i++) {
-            for (int j = 0; j < aMinusB.getWidth(); j++) {
-                assertEquals(aMinusB.getValue(j, i), aMinusB_expected.getValue(j, i));
-            }
-        }
+        TestingTools.compare(aMinusB, aMinusB_expected, "Incorrect difference for A - B");
 
+        // B - A test
         Matrix bMinusA = op.subtract(b, a);
         Matrix bMinusA_expected = new Matrix(new int[][]{{17, 15, 13}, {11, 9, 7}, {5, 3, 1}});
-        for (int i = 0; i < bMinusA.getLength(); i++) {
-            for (int j = 0; j < bMinusA.getWidth(); j++) {
-                assertEquals(bMinusA.getValue(j, i), bMinusA_expected.getValue(j, i));
-            }
-        }
+
+        TestingTools.compare(bMinusA, bMinusA_expected, "Incorrect difference for B - A");
     }
 }

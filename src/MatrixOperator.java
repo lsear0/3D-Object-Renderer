@@ -112,6 +112,55 @@ public class MatrixOperator {
         return new Matrix[]{a, b};
     }
 
+    /*
+    Splits a matrix into two submatrices of equal length.
+
+    If a matrix's length is not evenly divisible by 2, extra space is allocated for the second
+    submatrix to ensure both submatrices are of equal size. The extra space is filled with zeroes.
+    */
+    public Matrix[] strassenSplit(Matrix matrix, boolean lengthwise) {
+        Matrix a;
+        Matrix b;
+
+        if (lengthwise) { // split b from the bottom of a
+            a = new Matrix((matrix.getLength() + 1) / 2, matrix.getWidth());
+            b = new Matrix((matrix.getLength() + 1) / 2, matrix.getWidth());
+
+            // add a's values
+            for (int i = 0; i < a.getLength(); i++) {
+                for (int j = 0; j < a.getWidth(); j++) {
+                    a.setValue(j, i, matrix.getValue(j, i));
+                }
+            }
+
+            // add b's values
+            for (int i = a.getLength(); i < matrix.getLength(); i++) {
+                for (int j = 0; j < b.getWidth(); j++) {
+                    b.setValue(j, i - a.getLength(), matrix.getValue(j, i));
+                }
+            }
+        } else { // split b from the right of a
+            a = new Matrix(matrix.getLength(), (matrix.getWidth() + 1) / 2);
+            b = new Matrix(matrix.getLength(), (matrix.getWidth() + 1) / 2);
+
+            // add a's values
+            for (int i = 0; i < a.getLength(); i++) {
+                for (int j = 0; j < a.getWidth(); j++) {
+                    a.setValue(j, i, matrix.getValue(j, i));
+                }
+            }
+
+            // add b's values
+            for (int i = 0; i < b.getLength(); i++) {
+                for (int j = a.getWidth(); j < matrix.getWidth(); j++) {
+                    b.setValue(j - a.getWidth(), i, matrix.getValue(j, i));
+                }
+            }
+        }
+
+        return new Matrix[]{a, b};
+    }
+
     public Matrix add(Matrix a, Matrix b) {
         // reject invalid inputs
         if (a.getLength() != b.getLength() || a.getWidth() != b.getWidth()) {
@@ -183,7 +232,6 @@ public class MatrixOperator {
         Matrix product = new Matrix(a.getLength(), b.getWidth());
 
         // initialize submatrices
-        // TODO: implement the rest of the algorithm
         Matrix M1 = new Matrix(1, 1);
         Matrix M2 = new Matrix(1, 1);
         Matrix M3 = new Matrix(1, 1);
