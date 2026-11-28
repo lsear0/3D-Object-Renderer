@@ -1,3 +1,5 @@
+package src;
+
 public class Triangle {
     private Point p1;
     private Point p2;

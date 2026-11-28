@@ -1,3 +1,5 @@
+package src;
+
 public class MatrixOperator {
     public MatrixOperator() {};
 
@@ -23,9 +25,9 @@ public class MatrixOperator {
             }
 
             // add b's values
-            for (int i = a.getLength(); i < a.getLength() + b.getLength(); i++) {
+            for (int i = 0; i < b.getLength(); i++) {
                 for (int j = 0; j < b.getWidth(); j++) {
-                    appended.setValue(j, i, b.getValue(j, i));
+                    appended.setValue(j, i + a.getLength(), b.getValue(j, i));
                 }
             }
         } else { // append b to the right of a
@@ -40,13 +42,74 @@ public class MatrixOperator {
 
             // add b's values
             for (int i = 0; i < b.getLength(); i++) {
-                for (int j = a.getWidth(); j < a.getWidth() + b.getWidth(); j++) {
-                    appended.setValue(j, i, b.getValue(j, i));
+                for (int j = 0; j < b.getWidth(); j++) {
+                    appended.setValue(j + a.getLength(), i, b.getValue(j, i));
                 }
             }
         }
 
         return appended;
+    }
+
+    /*
+    Splits a matrix into two submatrices.
+
+    "index" is the point at which the split occurs. The first submatrix will cover everything up to
+    and including that index, and the second submatrix will cover everything afterwards. Note that
+    it is 0-indexed, so index = 0 still splits the top row or column from the rest of the matrix.
+    */
+    public Matrix[] split(Matrix matrix, boolean lengthwise, int index) {
+        // reject invalid inputs
+        if (index < 0) {
+            return new Matrix[]{null, matrix};
+        }
+        if (lengthwise && index >= matrix.getLength()) {
+            return new Matrix[]{matrix, null};
+        }
+        if (!lengthwise && index >= matrix.getWidth()) {
+            return new Matrix[]{matrix, null};
+        }
+
+        Matrix a;
+        Matrix b;
+
+        if (lengthwise) { // split b from the bottom of a
+            a = new Matrix(index + 1, matrix.getWidth());
+            b = new Matrix(matrix.getLength() - (index + 1), matrix.getWidth());
+
+            // add a's values
+            for (int i = 0; i < a.getLength(); i++) {
+                for (int j = 0; j < a.getWidth(); j++) {
+                    a.setValue(j, i, matrix.getValue(j, i));
+                }
+            }
+
+            // add b's values
+            for (int i = 0; i < b.getLength(); i++) {
+                for (int j = 0; j < b.getWidth(); j++) {
+                    b.setValue(j, i, matrix.getValue(j, i + index + 1));
+                }
+            }
+        } else { // split b from the right of a
+            a = new Matrix(matrix.getLength(), index + 1);
+            b = new Matrix(matrix.getLength(), matrix.getWidth() - (index + 1));
+
+            // add a's values
+            for (int i = 0; i < a.getLength(); i++) {
+                for (int j = 0; j < a.getWidth(); j++) {
+                    a.setValue(j, i, matrix.getValue(j, i));
+                }
+            }
+
+            // add b's values
+            for (int i = 0; i < b.getLength(); i++) {
+                for (int j = 0; j < b.getWidth(); j++) {
+                    b.setValue(j, i, matrix.getValue(j + index + 1, i));
+                }
+            }
+        }
+
+        return new Matrix[]{a, b};
     }
 
     public Matrix add(Matrix a, Matrix b) {

@@ -18,3 +18,12 @@ I found that, in order to implement the algorithm, I would need two additional m
 I implemented these three methods, and also moved every matrix operation from the Matrix class itself to a new class called MatrixOperator. I think having all the arithmetic in a separate class tidies up the code a bit.
 
 Tomorrow I plan to finish implementing Strassen's algorithm, then I'll use it to render 3D objects.
+
+
+Entry 3 - 11/27
+
+I mentioned in the last entry that I wanted to implement Strassen's algorithm. I didn't get around to that today, but I did implement some things that will prove very helpful later on in the project.
+
+Firstly, I implemented a split function which splits a matrix A into two submatrices. The caller can choose whether that split is lengthwise or widthwise, and the index it happens at. This function will save a lot of time when I actually implement Strassen's algorithm, since some of the steps involve splitting a matrix into submatrices.
+
+Secondly, I implemented tests for the MatrixOperator class. Specifically, there are tests for addition, subtraction, appending, splitting, and (standard) multiplying. These are nice to have because it means I can verify that the functions actually work correctly. Subsequently, I shouldn't run into as many unexpected bugs later down the line.

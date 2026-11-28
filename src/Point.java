@@ -1,3 +1,5 @@
+package src;
+
 public class Point {
     private float x;
     private float y;

@@ -1,4 +1,6 @@
-class Matrix {
+package src;
+
+public class Matrix {
     private int length;
     private int width;
     private int[][] matrix;
